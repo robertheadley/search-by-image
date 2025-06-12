@@ -334,6 +334,12 @@ const engines = {
       isExec: true
     }
   },
+  hive: {
+    image: {
+      target: 'https://bizarrus.github.io/Hive/',
+      isExec: true
+    }
+  },
   googleImages: {
     url: {
       target:
@@ -384,7 +390,7 @@ const sponsorLogoVariants = {
   lenso: ['dark']
 };
 
-const rasterEngineIcons = ['iqdb', 'tineye', 'whatanime', 'repostSleuth'];
+const rasterEngineIcons = ['iqdb', 'tineye', 'whatanime', 'repostSleuth', 'hive'];
 
 // https://github.com/jshttp/mime-db
 const imageMimeTypes = {
@@ -602,7 +608,8 @@ const webpEngineSupport = [
   'icons8',
   'lenso',
   'googleImages',
-  'unsplash'
+  'unsplash',
+  'hive'
 ];
 
 // Search engines only support the image format in compatible browsers.
@@ -615,7 +622,8 @@ const avifEngineSupport = [
   'alibabaChina',
   'dreamstime',
   'pond5',
-  'lexica'
+  'lexica',
+  'hive'
 ];
 
 const gifEngineSupport = [
@@ -692,7 +700,8 @@ const maxImageUploadSize = {
   icons8: {ui: 5 * 1024 * 1024},
   lenso: {ui: 10 * 1024 * 1024},
   googleImages: {api: 20 * 1024 * 1024},
-  unsplash: {api: Infinity, ui: 20 * 1024 * 1024}
+  unsplash: {api: Infinity, ui: 20 * 1024 * 1024},
+  hive: {ui: 10 * 1024 * 1024}
 };
 
 const chromeDesktopUA =

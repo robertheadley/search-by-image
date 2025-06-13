@@ -569,7 +569,9 @@ async function search({session, search, image, storageIds}) {
 }
 ```
 
-## Example: Complete Hive Implementation
+## Real-World Implementation Examples
+
+### Example 1: Hive Engine (Hybrid Approach)
 
 The Hive engine implementation demonstrates several patterns:
 
@@ -579,6 +581,150 @@ The Hive engine implementation demonstrates several patterns:
 4. **Proper error handling** - Graceful fallbacks and error logging
 
 This makes it a good reference for implementing robust search engines that work across different scenarios.
+
+### Example 2: CopySeeker Engine (File Upload Focus)
+
+The CopySeeker implementation teaches us about file-upload focused engines:
+
+1. **Simplified Interface** - Pure file upload without URL complexity
+2. **Strategic Placement** - Positioned after similar engines (Hive) for better UX
+3. **Icon Integration** - Official App Store icons work seamlessly with build system
+4. **Plagiarism Detection** - Specialized use case for copyright/plagiarism detection
+
+## Implementation Lessons Learned
+
+### Configuration File Variations
+**Important Discovery**: Different forks may have evolved migration naming conventions.
+
+```javascript
+// Some forks use descriptive names:
+"20140717162040_add_tineye"
+
+// Others use shortened IDs:
+"ryekyizAg"
+```
+
+**Lesson**: Always check `src/storage/config.json` structure before assuming format.
+
+### Build System Intelligence
+**Discovery**: The build system automatically handles asset processing.
+
+**What Happens Automatically**:
+- Icon optimization and resizing
+- Asset counting and bundle creation
+- Cross-browser compatibility adjustments
+- Format conversion preparation
+
+**Evidence**:
+- Engine assets increased from 46 to 47 (visible in build output)
+- Total size increase: ~9KB for new engine + icon
+- Different output sizes for Chrome vs Firefox builds
+
+### Migration Placement Strategy
+**Best Practice**: Group similar engines together for better user experience.
+
+```javascript
+// ✅ GOOD: Place similar engines together
+const hiveIndex = engines.indexOf('hive'); // Find similar engine
+if (hiveIndex !== -1) {
+  engines.splice(hiveIndex + 1, 0, newEngine); // Place after it
+}
+
+// ❌ LESS OPTIMAL: Always append to end
+engines.push(newEngine);
+```
+
+**Reasoning**: Users discover related functionality more easily when engines are logically grouped.
+
+### Format Support Array Insights
+**Critical Learning**: Trust the framework's intelligence over manual overrides.
+
+**Key Insight**: The `prepareImageForUpload` function is more sophisticated than initially apparent:
+- Only converts when truly necessary
+- Considers both format compatibility AND size limits
+- Preserves original quality when possible
+- Handles edge cases automatically
+
+**Implication**: Don't add engines to format support arrays unless they **genuinely** accept those formats natively.
+
+### Cross-Browser Build Differences
+**Observation**: Builds produce slightly different outputs per browser.
+
+**Firefox Build**:
+```
+assets by path engines/ 418 KiB 47 assets
+modules by path ./src/ 401 KiB (javascript)
+```
+
+**Chrome Build**:
+```
+assets by path engines/ 418 KiB 47 assets
+modules by path ./src/ 398 KiB (javascript)
+```
+
+**Lesson**: Always test both builds to ensure compatibility across browsers.
+
+### Error Handling Evolution
+**Pattern**: Start simple, add sophistication as needed.
+
+```javascript
+// ✅ PRODUCTION READY: Comprehensive error handling
+if (fileInput) {
+  await setFileInputData(fileInputSelector, fileInput, preparedImage);
+  fileInput.dispatchEvent(new Event('change', {bubbles: true}));
+} else {
+  console.error('CopySeeker: No file input found for image upload');
+}
+```
+
+**Learning**: Include clear error messages for debugging, but don't over-engineer initially.
+
+## Common Implementation Gotchas
+
+### 1. Config File Structure Assumptions
+**Problem**: Assuming migration format without checking.
+**Solution**: Always read `config.json` first to understand the structure.
+
+### 2. Format Array Over-inclusion
+**Problem**: Adding engines to format support arrays when they don't natively support formats.
+**Solution**: Only include engines that genuinely accept the format directly.
+
+### 3. Icon Asset Management
+**Problem**: Manual icon processing or incorrect sizing.
+**Solution**: Let the build system handle optimization automatically.
+
+### 4. Migration Ordering Logic
+**Problem**: Random placement of new engines in user interface.
+**Solution**: Strategic placement near similar engines for better UX.
+
+### 5. Build Verification Shortcuts
+**Problem**: Only testing one browser build.
+**Solution**: Always build and verify both Firefox and Chrome outputs.
+
+## Implementation Checklist
+
+Based on real-world experience, use this checklist:
+
+### Pre-Implementation
+- [ ] Analyze target site interface (file upload vs URL-based)
+- [ ] Check `config.json` format in your specific fork
+- [ ] Identify similar engines for strategic placement
+- [ ] Source official icon from reliable location
+
+### During Implementation
+- [ ] Use automatic format conversion (`{image, engine}`) unless specifically required
+- [ ] Include comprehensive error handling with clear messages
+- [ ] Place engine logically in migration (near similar engines)
+- [ ] Test with various image formats and sizes
+
+### Post-Implementation
+- [ ] Build for both Firefox AND Chrome
+- [ ] Verify asset count increased in build output
+- [ ] Test engine appears correctly in UI
+- [ ] Confirm migration works on clean install
+- [ ] Document any unique patterns discovered
+
+This checklist helps avoid common pitfalls discovered during real implementations.
 
 ## Conclusion
 

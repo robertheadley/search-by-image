@@ -60,7 +60,8 @@
       "20250317134215_add_back_google_images",
       "20250413115022_add_unsplash",
       "20250511143502_remove_karma_decay",
-      "20250611183700_add_hive"
+      "20250611183700_add_hive",
+      "20250613183400_add_copyseeker"
     ],
     "session": [
       "20240514122825_initial_version"

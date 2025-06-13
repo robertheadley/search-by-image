@@ -357,6 +357,12 @@ const engines = {
       target: 'https://unsplash.com/',
       isExec: true
     }
+  },
+  copyseeker: {
+    image: {
+      target: 'https://copyseeker.net/',
+      isExec: true
+    }
   }
 };
 
@@ -390,7 +396,7 @@ const sponsorLogoVariants = {
   lenso: ['dark']
 };
 
-const rasterEngineIcons = ['iqdb', 'tineye', 'whatanime', 'repostSleuth', 'hive'];
+const rasterEngineIcons = ['iqdb', 'tineye', 'whatanime', 'repostSleuth', 'hive', 'copyseeker'];
 
 // https://github.com/jshttp/mime-db
 const imageMimeTypes = {
@@ -699,7 +705,8 @@ const maxImageUploadSize = {
   lenso: {ui: 10 * 1024 * 1024},
   googleImages: {api: 20 * 1024 * 1024},
   unsplash: {api: Infinity, ui: 20 * 1024 * 1024},
-  hive: {ui: 10 * 1024 * 1024}
+  hive: {ui: 10 * 1024 * 1024},
+  copyseeker: {ui: 10 * 1024 * 1024}
 };
 
 const chromeDesktopUA =

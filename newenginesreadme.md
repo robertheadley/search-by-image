@@ -364,28 +364,158 @@ Test the following scenarios:
 ## Advanced Patterns
 
 ### Image Format Optimization
-The extension has intelligent format conversion built-in. Follow these best practices:
+
+The extension has intelligent format conversion built-in that optimizes performance and compatibility. Understanding when and how to use these features is crucial for optimal engine implementation.
+
+#### Automatic Format Conversion (Recommended)
 
 ```javascript
-// ✅ GOOD: Let the extension handle conversion automatically
+// ✅ RECOMMENDED: Let the extension handle conversion automatically
 const preparedImage = await prepareImageForUpload({
   image,
   engine
 });
+```
 
-// ❌ AVOID: Don't force conversion unless absolutely necessary
+**When to use:**
+- ✅ **Most engines** - Default approach for 95% of implementations
+- ✅ **Engines with limited format support** (like Hive - only supports JPG, PNG, WebP)
+- ✅ **Unknown or undocumented format support** - Safe default behavior
+- ✅ **Engines with size limits** - Automatic optimization for large images
+
+**How it works:**
+1. **Format Detection**: Checks if engine natively supports the image format
+2. **Size Analysis**: Evaluates if image exceeds engine's size limits
+3. **Smart Conversion**: Only converts when necessary (unsupported format OR size limit exceeded)
+4. **Format Preservation**: Compatible formats upload directly without unnecessary conversion
+
+#### Manual Format Conversion (Special Cases)
+
+```javascript
+// ⚠️ CONDITIONAL: Force conversion only when engine has specific requirements
 const preparedImage = await prepareImageForUpload({
   image,
   engine,
-  newType: 'image/jpeg' // Only use if engine has specific requirements
+  newType: 'image/jpeg' // Use sparingly
 });
 ```
 
-**How it works:**
-- Extension automatically converts AVIF, WebP, and GIF when the engine doesn't support them
-- Conversion only happens when needed (size limits or format incompatibility)
-- If an AVIF image is small enough and engine supports it, no conversion occurs
-- Only add engines to format support arrays if they **natively** support those formats
+**When to use:**
+- ⚠️ **Documented format requirements** - Engine explicitly requires specific format
+- ⚠️ **API constraints** - REST APIs that only accept certain MIME types
+- ⚠️ **Legacy engines** - Older services with strict format validation
+- ⚠️ **Quality optimization** - When JPEG compression is specifically needed
+
+**Examples of when forced conversion might be necessary:**
+```javascript
+// Engine that ONLY accepts JPEG (rare)
+const preparedImage = await prepareImageForUpload({
+  image,
+  engine,
+  newType: 'image/jpeg'
+});
+
+// API with strict MIME type validation
+const preparedImage = await prepareImageForUpload({
+  image,
+  engine,
+  newType: 'image/png' // API only accepts PNG
+});
+```
+
+#### Format Support Array Configuration
+
+**❌ AVOID: Don't add engines to format arrays unless they natively support the format**
+
+```javascript
+// Wrong - adds Hive even though it doesn't support AVIF/WebP natively
+const avifEngineSupport = [
+  'bing', 'yandex', 'hive' // ❌ Hive doesn't natively support AVIF
+];
+```
+
+**✅ CORRECT: Only add engines that natively accept the format**
+
+```javascript
+// Correct - only engines that accept AVIF uploads directly
+const avifEngineSupport = [
+  'bing',     // ✅ Bing accepts AVIF uploads
+  'yandex',   // ✅ Yandex accepts AVIF uploads
+  // 'hive'   // ❌ Removed - Hive doesn't accept AVIF
+];
+```
+
+#### Decision Matrix for Format Handling
+
+| Engine Scenario | Format Arrays | prepareImageForUpload | Reasoning |
+|-----------------|---------------|----------------------|-----------|
+| **Modern engine (Google, Bing)** | Add to webp/avif arrays | `{image, engine}` | Native support = faster uploads |
+| **Limited engine (Hive, TinEye)** | Don't add to arrays | `{image, engine}` | Let extension handle conversion |
+| **JPEG-only engine** | Don't add to arrays | `{image, engine, newType: 'image/jpeg'}` | Force JPEG for compatibility |
+| **PNG-only API** | Don't add to arrays | `{image, engine, newType: 'image/png'}` | API requirement |
+| **Unknown support** | Don't add to arrays | `{image, engine}` | Safe default approach |
+
+#### Performance Impact Analysis
+
+**Automatic Conversion (Recommended):**
+- ✅ **Optimal performance** - No unnecessary conversions
+- ✅ **Format preservation** - JPEG stays JPEG, PNG stays PNG
+- ✅ **Smart optimization** - Only converts when needed
+- ✅ **Size efficiency** - Respects original compression
+
+**Manual Conversion (newType specified):**
+- ⚠️ **Always converts** - Even when original format would work
+- ⚠️ **Quality loss** - Potential compression artifacts
+- ⚠️ **Larger files** - May increase upload size unnecessarily
+- ⚠️ **Processing overhead** - Additional conversion step
+
+#### Real-World Examples
+
+**Example 1: Hive Engine (Limited Format Support)**
+```javascript
+// ✅ OPTIMAL: Let extension handle AVIF→JPEG conversion automatically
+const preparedImage = await prepareImageForUpload({
+  image,
+  engine // Extension detects Hive doesn't support AVIF and converts
+});
+
+// ❌ SUBOPTIMAL: Forces all images to JPEG
+const preparedImage = await prepareImageForUpload({
+  image,
+  engine,
+  newType: 'image/jpeg' // Converts even PNG/JPEG unnecessarily
+});
+```
+
+**Example 2: Google Images (Full Format Support)**
+```javascript
+// ✅ OPTIMAL: No conversion needed for most formats
+const preparedImage = await prepareImageForUpload({
+  image,
+  engine // Google accepts AVIF, WebP, JPEG, PNG directly
+});
+```
+
+**Example 3: Legacy API (JPEG Only)**
+```javascript
+// ✅ NECESSARY: API requirement forces conversion
+const preparedImage = await prepareImageForUpload({
+  image,
+  engine,
+  newType: 'image/jpeg' // Required by API specification
+});
+```
+
+#### Testing Format Optimization
+
+When testing your engine implementation:
+
+1. **Test with different formats**: JPEG, PNG, WebP, AVIF, GIF
+2. **Verify no unnecessary conversions**: Check browser dev tools for actual uploaded format
+3. **Test size limits**: Upload large images to verify size optimization
+4. **Monitor performance**: Measure upload times with different approaches
+
+The goal is to minimize conversions while ensuring compatibility.
 
 ### Custom Form Handling
 Some engines may require additional form fields:

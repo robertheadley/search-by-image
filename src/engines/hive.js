@@ -21,12 +21,11 @@ async function search({session, search, image, storageIds}) {
   if (shouldUseFileUpload) {
     // Handle blob/file upload with format conversion
     try {
-      // Ensure image is in a compatible format (JPG, PNG, WebP)
-      // Hive doesn't support AVIF and other modern formats
+      // Let prepareImageForUpload handle format conversion automatically
+      // based on what Hive supports and image size constraints
       const preparedImage = await prepareImageForUpload({
         image,
-        engine,
-        newType: 'image/jpeg' // Convert to JPEG if format is unsupported
+        engine
       });
 
       const fileInputSelector = 'input[type="file"]';

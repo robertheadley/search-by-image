@@ -608,8 +608,7 @@ const webpEngineSupport = [
   'icons8',
   'lenso',
   'googleImages',
-  'unsplash',
-  'hive'
+  'unsplash'
 ];
 
 // Search engines only support the image format in compatible browsers.
@@ -622,8 +621,7 @@ const avifEngineSupport = [
   'alibabaChina',
   'dreamstime',
   'pond5',
-  'lexica',
-  'hive'
+  'lexica'
 ];
 
 const gifEngineSupport = [

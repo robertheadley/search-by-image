@@ -51,10 +51,10 @@ if (runOnce('search')) {
 async function search({session, search, image, storageIds}) {
   await sendReceipt(storageIds);
 
+  // Let prepareImageForUpload handle format conversion automatically
   const preparedImage = await prepareImageForUpload({
     image,
-    engine,
-    newType: 'image/jpeg' // Convert to compatible format if needed
+    engine
   });
 
   const fileInputSelector = 'input[type="file"]'; // Adjust selector as needed
@@ -126,27 +126,29 @@ const engines = {
 - `image.isExec: true`: Indicates this engine requires script execution
 
 ### 2.2 Add Format Support
-Add your engine to relevant format support arrays:
+Add your engine to relevant format support arrays **only if the engine natively supports these formats**:
 
 ```javascript
-// For WebP support
+// For WebP support - only add if engine natively supports WebP
 const webpEngineSupport = [
   // ... existing engines ...
-  'enginename'
+  'enginename' // Only if engine accepts WebP uploads directly
 ];
 
-// For AVIF support (if engine supports modern formats)
+// For AVIF support - only add if engine natively supports AVIF
 const avifEngineSupport = [
   // ... existing engines ...
-  'enginename'
+  'enginename' // Only if engine accepts AVIF uploads directly
 ];
 
-// For GIF support (if engine supports animated images)
+// For GIF support - only add if engine supports animated images
 const gifEngineSupport = [
   // ... existing engines ...
-  'enginename'
+  'enginename' // Only if engine accepts GIF uploads directly
 ];
 ```
+
+**Important**: If your engine doesn't natively support these formats, **don't add it to these arrays**. The `prepareImageForUpload` function will automatically convert unsupported formats when needed.
 
 ### 2.3 Add Upload Size Limits
 ```javascript
@@ -360,6 +362,30 @@ Test the following scenarios:
 - Verify timestamp format in filename
 
 ## Advanced Patterns
+
+### Image Format Optimization
+The extension has intelligent format conversion built-in. Follow these best practices:
+
+```javascript
+// ✅ GOOD: Let the extension handle conversion automatically
+const preparedImage = await prepareImageForUpload({
+  image,
+  engine
+});
+
+// ❌ AVOID: Don't force conversion unless absolutely necessary
+const preparedImage = await prepareImageForUpload({
+  image,
+  engine,
+  newType: 'image/jpeg' // Only use if engine has specific requirements
+});
+```
+
+**How it works:**
+- Extension automatically converts AVIF, WebP, and GIF when the engine doesn't support them
+- Conversion only happens when needed (size limits or format incompatibility)
+- If an AVIF image is small enough and engine supports it, no conversion occurs
+- Only add engines to format support arrays if they **natively** support those formats
 
 ### Custom Form Handling
 Some engines may require additional form fields:
